@@ -22,9 +22,3 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 require __DIR__.'/auth.php';
-
-// Start: Cuzt
-
-Route::get('{path}', "HomeController@index")->where('path', '([A-z\d-\/_.]+)?');
-
-// End: Cuzt
