@@ -17,7 +17,7 @@ import routes from './routes';
 Vue.use(VueRouter);
 
 // Import Form
-import Form from 'vform'
+import Form from 'vform';
 
 window.Form = Form;
 
@@ -28,7 +28,21 @@ Vue.use(VueProgressBar, {
   color: 'rgb(143, 255, 199)',
   failedColor: 'red',
   height: '2px'
-})
+});
+
+// Import Sweet Alert
+import swal from 'sweetalert2';
+
+window.swal = swal;
+
+const toast = swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3000
+});
+
+window.toast = toast;
 
 // End: Cuzt
 

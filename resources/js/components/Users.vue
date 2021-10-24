@@ -167,11 +167,17 @@
           this.users = data.data;
         });     
       }, 	
-	    createUser () {
-	    	this.$Progress.start();
-	      // this.form.post('/api/user');
-	      this.form.post('/laravel/laravelVueBreeze/api/user');	      
-	      this.$Progress.finish();
+	    createUser () {	    	
+	    	this.$Progress.start(); // Start Progress Bar
+	      this.form.post('/laravel/laravelVueBreeze/api/user'); // API Request	      
+	      $('#exampleModal').modal('hide'); // Hide Modal
+				
+				toast.fire({
+				  icon: 'success',
+				  title: 'Signed in successfully'
+				})
+	      
+	      this.$Progress.finish(); // Finish Progress Bar
 	    }
 	  },
 	  created() {
