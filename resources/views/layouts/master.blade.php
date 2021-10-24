@@ -12,6 +12,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <title>AdminLTE 3 | Starter</title>
 
   <link rel="stylesheet" type="text/css" href="{{ asset('public/css/app.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ asset('public/css/custom.css') }}">
 </head>
 <body class="hold-transition sidebar-mini">
 <div id="app" class="wrapper">
@@ -200,12 +201,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </p>
             </a>
             <ul class="nav nav-treeview">
-              <li class="nav-item">
+              <!-- <li class="nav-item">
                 <a href="#" class="nav-link active">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Active Page</p>
                 </a>
-              </li>
+              </li> -->
               <li class="nav-item">
                 <router-link to="/dashboard" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
