@@ -1,4 +1,5 @@
 import Dashboard from './components/Dashboard';
+import Users from './components/Users';
 import Profile from './components/Profile';
 import NotFound from './components/NotFound';
 
@@ -15,6 +16,11 @@ export default{
       component: Dashboard,
       name: "Dashboard"
     },
+    {
+      path: '/users',
+      component: Users,
+      name: "Users"
+    },    
     {
       path: '/profile',
       component: Profile,

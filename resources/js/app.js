@@ -10,12 +10,16 @@ window.Vue = require('vue').default;
 
 // Start: Cuzt
 
+// Import Vue Router
 import VueRouter from 'vue-router';
 import routes from './routes';
 
 Vue.use(VueRouter);
 
+// Import Form
+import Form from 'vform'
 
+window.Form = Form;
 
 // End: Cuzt
 

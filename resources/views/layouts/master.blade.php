@@ -219,22 +219,26 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <p>Profile</p>
                 </router-link>
               </li> 
-							<li>
-								<a class="dropdown-item" href="{{ route('logout') }}"
-									onclick="event.preventDefault();
-										document.getElementById('logout-form').submit();">
-									<i class="nav-icon fas fa-sign-out-alt"></i>
-									{{ __('Logout') }}
-								</a>
-
-								<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-									@csrf
-								</form>	
-							</li>
-
-
             </ul>
           </li>
+          <li class="nav-item">
+            <router-link to="/users" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>Users</p>
+            </router-link>
+          </li>                  
+					<li class="nav-item">
+						<a class="nav-link" href="{{ route('logout') }}"
+							onclick="event.preventDefault();
+								document.getElementById('logout-form').submit();">
+							<i class="nav-icon fas fa-sign-out-alt"></i>
+							<p>{{ __('Logout') }}</p>
+						</a>
+
+						<form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+							@csrf
+						</form>	
+					</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-th"></i>
