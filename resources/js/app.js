@@ -21,6 +21,15 @@ import Form from 'vform'
 
 window.Form = Form;
 
+// Import Vue Progress Bar
+import VueProgressBar from 'vue-progressbar'
+
+Vue.use(VueProgressBar, {
+  color: 'rgb(143, 255, 199)',
+  failedColor: 'red',
+  height: '2px'
+})
+
 // End: Cuzt
 
 /**

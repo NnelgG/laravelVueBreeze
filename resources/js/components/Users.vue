@@ -168,8 +168,10 @@
         });     
       }, 	
 	    createUser () {
+	    	this.$Progress.start();
 	      // this.form.post('/api/user');
 	      this.form.post('/laravel/laravelVueBreeze/api/user');	      
+	      this.$Progress.finish();
 	    }
 	  },
 	  created() {
