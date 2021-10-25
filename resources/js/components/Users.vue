@@ -20,11 +20,11 @@
 				        <div class="col-sm-12 col-md-6">
 				          <div id="example1_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control form-control-sm" placeholder="" aria-controls="example1"></label></div>
 				        </div>
-				        <div class="col-sm-12 col-md-6">
-				          <button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#exampleModal">
-				          	<i class="fas fa-user-plus"></i>
-									  Add User
-									</button>
+				        <div class="col-sm-12 col-md-6">				        	
+				        	<button type="button" class="btn btn-block btn-primary" data-toggle="modal" data-target="#exampleModal" @click.prevent="showModalAddUser">
+				        		<i class="fas fa-user-plus"></i>
+				        		Add New User
+				        	</button>
 				        </div>				        
 				      </div>
 				      <div class="row">
@@ -59,7 +59,7 @@
 					              <td class="align-middle">{{ user.name }}</td>
 					              <td class="align-middle">{{ user.email }}</td>
 					              <td class="align-middle">
-					                <a href="" @click.prevent="editUser(user)">
+					                <a href="" @click.prevent="showModalEditUser(user)">
 					                  <i class="fa fa-edit"></i>
 					                </a>
 					                <a href="" @click.prevent="deleteUser(user.id)">
@@ -111,30 +111,26 @@
 		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		  <div class="modal-dialog modal-dialog-centered">
 		    <div class="modal-content">
-		      <div class="modal-header">
-		        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-		        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-		      </div>
-		      <div class="modal-body">		        
-					  <form @submit.prevent="createUser" @keydown="form.onKeydown($event)">
+		    	<form @submit.prevent="isFormCreateUserMode ? createUser() : updateUser()">
+			      <div class="modal-header">
+			        <h5 v-show="isFormCreateUserMode" class="modal-title" id="exampleModalLabel">Add New User</h5>
+			        <h5 v-show="!isFormCreateUserMode" class="modal-title" id="exampleModalLabel">Update User's Info</h5>
+			        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+			      </div>
+			      <div class="modal-body">				      	        
 					    <input v-model="form.name" type="text" name="name" placeholder="Name">
 					    <div v-if="form.errors.has('name')" v-html="form.errors.get('name')" />
-
 					    <input v-model="form.email" type="email" name="email" placeholder="Email">
 					    <div v-if="form.errors.has('email')" v-html="form.errors.get('email')" />
-
 							<input v-model="form.password" type="password" name="password" placeholder="Password">
 					    <div v-if="form.errors.has('password')" v-html="form.errors.get('password')" />
-
-					    <button type="submit" :disabled="form.busy">
-					      Save
-					    </button>
-					  </form>		      	
-		      </div>
-		      <div class="modal-footer">
-		        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-		        <button type="button" class="btn btn-primary">Save changes</button>
-		      </div>
+			      </div>
+			      <div class="modal-footer">
+	            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	            <button type="submit" :disabled="form.busy" class="btn btn-primary" v-show="isFormCreateUserMode">Save changes</button>
+	            <button type="submit" :disabled="form.busy" class="btn btn-primary" v-show="!isFormCreateUserMode">Update</button>
+			      </div>
+		      </form>
 		    </div>
 		  </div>
 		</div>
@@ -148,11 +144,14 @@
 		data: () => ({
 			users: {},
 	    form: new Form({
+	      id: '',
 	      name: '',
 	      email: '',
 	      password: ''
-	    })
+	    }),
+	    isFormCreateUserMode: true
 	  }),
+
 	  methods: {
       getUsers(page) {
         if (typeof page === 'undefined') {
@@ -167,22 +166,83 @@
           this.users = data.data;
         });     
       }, 	
-	    createUser () {	    	
-	    	this.$Progress.start(); // Start Progress Bar
-	      this.form.post('/laravel/laravelVueBreeze/api/user'); // API Request	      
-	      $('#exampleModal').modal('hide'); // Hide Modal
-				
-				toast.fire({
-				  icon: 'success',
-				  title: 'Signed in successfully'
-				})
-	      
-	      this.$Progress.finish(); // Finish Progress Bar
-	    }
+
+      showModalAddUser() {
+        this.isFormCreateUserMode = true;
+        this.form.reset(); // Reset vform fields
+        $('#exampleModal').modal('show'); // Show modal
+      },
+
+	    createUser() {	    
+	      this.$Progress.start(); // Start Progress Bar
+				this.form.post('/laravel/laravelVueBreeze/api/user', {									
+				}).then(() => {				  
+				  $('#exampleModal').modal('hide'); // Hide modal
+				  toast.fire({icon: 'success', title: 'User created successfully'}); // Toast success
+				  this.getUsers(); // Call getUsers function
+				  this.$Progress.finish(); // Finish Progress Bar
+				}).catch(() => {
+					console.log('transaction failed');
+					this.$Progress.fail(); // Fail Progress Bar				
+				});
+	    },
+
+      showModalEditUser(user) {
+        this.isFormCreateUserMode = false;
+        this.form.clear(); // Clear vform error messages
+        this.form.reset(); // Reset vform fields        
+        $('#exampleModal').modal('show'); // Show modal
+        this.form.fill(user); // Fill vform fields w/ user details
+      },
+
+      updateUser() {
+      	this.$Progress.start(); // Start Progress Bar
+        this.form.put('/laravel/laravelVueBreeze/api/user/' + this.form.id, {
+        }).then(() => {
+          $('#exampleModal').modal('hide'); // Hide modal
+          toast.fire({ icon: 'success', title: "User's info updated successfully" }); // Toast success
+          this.getUsers(); // Call getUsers function
+          this.$Progress.finish(); // Finish Progress Bar
+        }).catch(() => {
+          console.log('transaction failed');
+          this.$Progress.fail(); // Fail Progress Bar
+        });
+      }, 			 
+
+      deleteUser(id) {
+        // Swal delete
+        swal.fire({
+				  title: 'Are you sure?',
+				  text: "You won't be able to revert this!",
+				  icon: 'warning',
+				  showCancelButton: true,
+				  confirmButtonColor: '#3085d6',
+				  cancelButtonColor: '#d33',
+				  confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          // Confirm delete? Y
+          if (result.isConfirmed) {
+          	this.$Progress.start(); // Start Progress Bar
+            this.form.delete('/laravel/laravelVueBreeze/api/user/' + id, {
+            }).then(() => {
+              toast.fire({ icon: 'success', title: "User's data deleted successfully" }); // Toast success
+              this.$Progress.finish(); // Finish Progress Bar
+              this.getUsers(); // Call getUsers function
+            }).catch(() => {							
+						  console.log('transaction failed');						           	
+              swal.fire({ icon: 'error', title: 'Oops...', text: 'Something went wrong!', footer: '<a href>Why do I have this issue?</a>'}); // Swal fail
+              this.$Progress.fail(); // Fail Progress Bar
+            });
+          }
+        });
+      }
+
 	  },
+	  
 	  created() {
 	  	this.getUsers();
 	  },
+
     mounted() {
 			console.log('Component mounted.')
     }

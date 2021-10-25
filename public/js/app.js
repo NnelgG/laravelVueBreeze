@@ -2347,19 +2347,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       users: {},
       form: new Form({
+        id: '',
         name: '',
         email: '',
         password: ''
-      })
+      }),
+      isFormCreateUserMode: true
     };
   },
   methods: {
@@ -2378,18 +2376,115 @@ __webpack_require__.r(__webpack_exports__);
         _this.users = data.data;
       });
     },
+    showModalAddUser: function showModalAddUser() {
+      this.isFormCreateUserMode = true;
+      this.form.reset(); // Reset vform fields
+
+      $('#exampleModal').modal('show'); // Show modal
+    },
     createUser: function createUser() {
+      var _this2 = this;
+
       this.$Progress.start(); // Start Progress Bar
 
-      this.form.post('/laravel/laravelVueBreeze/api/user'); // API Request	      
+      this.form.post('/laravel/laravelVueBreeze/api/user', {}).then(function () {
+        $('#exampleModal').modal('hide'); // Hide modal
 
-      $('#exampleModal').modal('hide'); // Hide Modal
+        toast.fire({
+          icon: 'success',
+          title: 'User created successfully'
+        }); // Toast success
 
-      toast.fire({
-        icon: 'success',
-        title: 'Signed in successfully'
+        _this2.getUsers(); // Call getUsers function
+
+
+        _this2.$Progress.finish(); // Finish Progress Bar
+
+      })["catch"](function () {
+        console.log('transaction failed');
+
+        _this2.$Progress.fail(); // Fail Progress Bar				
+
       });
-      this.$Progress.finish(); // Finish Progress Bar
+    },
+    showModalEditUser: function showModalEditUser(user) {
+      this.isFormCreateUserMode = false;
+      this.form.clear(); // Clear vform error messages
+
+      this.form.reset(); // Reset vform fields        
+
+      $('#exampleModal').modal('show'); // Show modal
+
+      this.form.fill(user); // Fill vform fields w/ user details
+    },
+    updateUser: function updateUser() {
+      var _this3 = this;
+
+      this.$Progress.start(); // Start Progress Bar
+
+      this.form.put('/laravel/laravelVueBreeze/api/user/' + this.form.id, {}).then(function () {
+        $('#exampleModal').modal('hide'); // Hide modal
+
+        toast.fire({
+          icon: 'success',
+          title: "User's info updated successfully"
+        }); // Toast success
+
+        _this3.getUsers(); // Call getUsers function
+
+
+        _this3.$Progress.finish(); // Finish Progress Bar
+
+      })["catch"](function () {
+        console.log('transaction failed');
+
+        _this3.$Progress.fail(); // Fail Progress Bar
+
+      });
+    },
+    deleteUser: function deleteUser(id) {
+      var _this4 = this;
+
+      // Swal delete
+      swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(function (result) {
+        // Confirm delete? Y
+        if (result.isConfirmed) {
+          _this4.$Progress.start(); // Start Progress Bar
+
+
+          _this4.form["delete"]('/laravel/laravelVueBreeze/api/user/' + id, {}).then(function () {
+            toast.fire({
+              icon: 'success',
+              title: "User's data deleted successfully"
+            }); // Toast success
+
+            _this4.$Progress.finish(); // Finish Progress Bar
+
+
+            _this4.getUsers(); // Call getUsers function
+
+          })["catch"](function () {
+            console.log('transaction failed');
+            swal.fire({
+              icon: 'error',
+              title: 'Oops...',
+              text: 'Something went wrong!',
+              footer: '<a href>Why do I have this issue?</a>'
+            }); // Swal fail
+
+            _this4.$Progress.fail(); // Fail Progress Bar
+
+          });
+        }
+      });
     }
   },
   created: function created() {
@@ -2447,7 +2542,12 @@ var toast = sweetalert2__WEBPACK_IMPORTED_MODULE_4___default().mixin({
   toast: true,
   position: 'top-end',
   showConfirmButton: false,
-  timer: 3000
+  timer: 3000,
+  timerProgressBar: true,
+  didOpen: function didOpen(toast) {
+    toast.addEventListener('mouseenter', Swal.stopTimer);
+    toast.addEventListener('mouseleave', Swal.resumeTimer);
+  }
 });
 window.toast = toast; // End: Cuzt
 
@@ -41750,7 +41850,35 @@ var render = function() {
                 attrs: { id: "example1_wrapper" }
               },
               [
-                _vm._m(1),
+                _c("div", { staticClass: "row" }, [
+                  _vm._m(1),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-sm-12 col-md-6" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-block btn-primary",
+                        attrs: {
+                          type: "button",
+                          "data-toggle": "modal",
+                          "data-target": "#exampleModal"
+                        },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.showModalAddUser.apply(null, arguments)
+                          }
+                        }
+                      },
+                      [
+                        _c("i", { staticClass: "fas fa-user-plus" }),
+                        _vm._v(
+                          "\n\t\t\t\t        \t\tAdd New User\n\t\t\t\t        \t"
+                        )
+                      ]
+                    )
+                  ])
+                ]),
                 _vm._v(" "),
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col-sm-12" }, [
@@ -41792,7 +41920,7 @@ var render = function() {
                                     on: {
                                       click: function($event) {
                                         $event.preventDefault()
-                                        return _vm.editUser(user)
+                                        return _vm.showModalEditUser(user)
                                       }
                                     }
                                   },
@@ -41846,23 +41974,65 @@ var render = function() {
       [
         _c("div", { staticClass: "modal-dialog modal-dialog-centered" }, [
           _c("div", { staticClass: "modal-content" }, [
-            _vm._m(5),
-            _vm._v(" "),
-            _c("div", { staticClass: "modal-body" }, [
-              _c(
-                "form",
-                {
-                  on: {
-                    submit: function($event) {
-                      $event.preventDefault()
-                      return _vm.createUser.apply(null, arguments)
-                    },
-                    keydown: function($event) {
-                      return _vm.form.onKeydown($event)
-                    }
+            _c(
+              "form",
+              {
+                on: {
+                  submit: function($event) {
+                    $event.preventDefault()
+                    _vm.isFormCreateUserMode
+                      ? _vm.createUser()
+                      : _vm.updateUser()
                   }
-                },
-                [
+                }
+              },
+              [
+                _c("div", { staticClass: "modal-header" }, [
+                  _c(
+                    "h5",
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.isFormCreateUserMode,
+                          expression: "isFormCreateUserMode"
+                        }
+                      ],
+                      staticClass: "modal-title",
+                      attrs: { id: "exampleModalLabel" }
+                    },
+                    [_vm._v("Add New User")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "h5",
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: !_vm.isFormCreateUserMode,
+                          expression: "!isFormCreateUserMode"
+                        }
+                      ],
+                      staticClass: "modal-title",
+                      attrs: { id: "exampleModalLabel" }
+                    },
+                    [_vm._v("Update User's Info")]
+                  ),
+                  _vm._v(" "),
+                  _c("button", {
+                    staticClass: "btn-close",
+                    attrs: {
+                      type: "button",
+                      "data-dismiss": "modal",
+                      "aria-label": "Close"
+                    }
+                  })
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-body" }, [
                   _c("input", {
                     directives: [
                       {
@@ -41956,18 +42126,55 @@ var render = function() {
                           innerHTML: _vm._s(_vm.form.errors.get("password"))
                         }
                       })
-                    : _vm._e(),
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "modal-footer" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-secondary",
+                      attrs: { type: "button", "data-dismiss": "modal" }
+                    },
+                    [_vm._v("Close")]
+                  ),
                   _vm._v(" "),
                   _c(
                     "button",
-                    { attrs: { type: "submit", disabled: _vm.form.busy } },
-                    [_vm._v("\n\t\t\t\t\t      Save\n\t\t\t\t\t    ")]
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.isFormCreateUserMode,
+                          expression: "isFormCreateUserMode"
+                        }
+                      ],
+                      staticClass: "btn btn-primary",
+                      attrs: { type: "submit", disabled: _vm.form.busy }
+                    },
+                    [_vm._v("Save changes")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      directives: [
+                        {
+                          name: "show",
+                          rawName: "v-show",
+                          value: !_vm.isFormCreateUserMode,
+                          expression: "!isFormCreateUserMode"
+                        }
+                      ],
+                      staticClass: "btn btn-primary",
+                      attrs: { type: "submit", disabled: _vm.form.busy }
+                    },
+                    [_vm._v("Update")]
                   )
-                ]
-              )
-            ]),
-            _vm._v(" "),
-            _vm._m(6)
+                ])
+              ]
+            )
           ])
         ])
       ]
@@ -41989,47 +42196,24 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row" }, [
-      _c("div", { staticClass: "col-sm-12 col-md-6" }, [
-        _c(
-          "div",
-          {
-            staticClass: "dataTables_filter",
-            attrs: { id: "example1_filter" }
-          },
-          [
-            _c("label", [
-              _vm._v("Search:"),
-              _c("input", {
-                staticClass: "form-control form-control-sm",
-                attrs: {
-                  type: "search",
-                  placeholder: "",
-                  "aria-controls": "example1"
-                }
-              })
-            ])
-          ]
-        )
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "col-sm-12 col-md-6" }, [
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-block btn-primary",
-            attrs: {
-              type: "button",
-              "data-toggle": "modal",
-              "data-target": "#exampleModal"
-            }
-          },
-          [
-            _c("i", { staticClass: "fas fa-user-plus" }),
-            _vm._v("\n\t\t\t\t\t\t\t\t\t  Add User\n\t\t\t\t\t\t\t\t\t")
-          ]
-        )
-      ])
+    return _c("div", { staticClass: "col-sm-12 col-md-6" }, [
+      _c(
+        "div",
+        { staticClass: "dataTables_filter", attrs: { id: "example1_filter" } },
+        [
+          _c("label", [
+            _vm._v("Search:"),
+            _c("input", {
+              staticClass: "form-control form-control-sm",
+              attrs: {
+                type: "search",
+                placeholder: "",
+                "aria-controls": "example1"
+              }
+            })
+          ])
+        ]
+      )
     ])
   },
   function() {
@@ -42292,48 +42476,6 @@ var staticRenderFns = [
           ]
         )
       ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-header" }, [
-      _c(
-        "h5",
-        { staticClass: "modal-title", attrs: { id: "exampleModalLabel" } },
-        [_vm._v("Modal title")]
-      ),
-      _vm._v(" "),
-      _c("button", {
-        staticClass: "btn-close",
-        attrs: {
-          type: "button",
-          "data-dismiss": "modal",
-          "aria-label": "Close"
-        }
-      })
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-footer" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-secondary",
-          attrs: { type: "button", "data-dismiss": "modal" }
-        },
-        [_vm._v("Close")]
-      ),
-      _vm._v(" "),
-      _c(
-        "button",
-        { staticClass: "btn btn-primary", attrs: { type: "button" } },
-        [_vm._v("Save changes")]
-      )
     ])
   }
 ]
